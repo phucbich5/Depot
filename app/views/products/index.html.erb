@@ -2,7 +2,6 @@
 <aside id="notice"><%= notice %></aside>
 <% end %>
 <h1>Products</h1>
-<table>
 <tfoot>
 <tr>
 <td colspan="3">
@@ -10,6 +9,8 @@
 </td>
 </tr>
 </tfoot>
+<table>
+
 <tbody>
 <% @products.each do |product| %>
 <tr class="<%= cycle('list_line_odd', 'list_line_even') %>">

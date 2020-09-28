@@ -4,7 +4,7 @@ class ProductsController < ApplicationController
   # GET /products
   # GET /products.json
   def index
-    @products = Product.all
+    @products = Product.all.order(:title)
   end
 
   # GET /products/1
@@ -44,7 +44,9 @@ class ProductsController < ApplicationController
       if @product.update(product_params)
         format.html { redirect_to @product, notice: 'Product was successfully updated.' }
         format.json { render :show, status: :ok, location: @product }
-      else
+        @products = Product.all.order(:title)
+        ActionCable.server.broadcast 'products',
+        html: render_to_string('store/index', layout: false)
         format.html { render :edit }
         format.json { render json: @product.errors, status: :unprocessable_entity }
       end
@@ -71,4 +73,26 @@ class ProductsController < ApplicationController
     def product_params
       params.require(:product).permit(:title, :description, :image_url, :price)
     end
+
+      # test "can't delete product in cart" do
+      #   assert_difference('Product.count', 0) do
+      #   delete product_url(products(:two))
+      #   end
+      #   assert_redirected_to products_url
+      #   end
+      #   test "should destroy product" do
+      #   assert_difference('Product.count', -1) do
+      #   delete product_url(@product)
+      #   end
+      #   assert_redirected_to products_url
+      #   end
+      def who_bought
+        @product = Product.find(params[:id])
+        @latest_order = @product.orders.order(:updated_at).last
+        if stale?(@latest_order)
+        respond_to do |format|
+        format.atom
+        end
+        end
+        end
 end
